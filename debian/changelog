@@ -1,3 +1,11 @@
+onboard (1.4.1-5+lmi) unstable; urgency=medium
+
+  * debian/patches:
+    + Add 1003_fix-handle-map-keysym-correctly.patch (from
+    https://launchpadlibrarian.net/446841263/0001-fix-handle-map-keysym-correctly.patch).
+
+ -- Audric Schiltknecht <audric.schiltknecht@logmein.com>  Thu, 21 Nov 2019 14:20:39 -0500
+
 onboard (1.4.1-4) unstable; urgency=medium
 
   * debian/control:

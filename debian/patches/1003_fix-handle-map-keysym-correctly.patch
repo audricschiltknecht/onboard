@@ -1,0 +1,47 @@
+From 46550f992516272dead01632883f7bda04f36813 Mon Sep 17 00:00:00 2001
+From: Sian Cao <yinshuiboy@gmail.com>
+Date: Wed, 16 Oct 2019 16:08:04 +0800
+Subject: [PATCH] fix: handle map keysym correctly
+
+The original map_keysym_xkb crash xkb, this fix it.
+
+I dont know why, but after change types we need to set keysym and
+device_spec. and secondly, should bring with types even we do not
+change it.
+---
+ Onboard/osk/osk_virtkey_x.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/Onboard/osk/osk_virtkey_x.c b/Onboard/osk/osk_virtkey_x.c
+index 64d88fb..ea757ba 100644
+--- a/Onboard/osk/osk_virtkey_x.c
++++ b/Onboard/osk/osk_virtkey_x.c
+@@ -334,6 +334,12 @@ map_keysym_xkb(VirtkeyBase* base, KeySym keysym, int group)
+     key_group = get_effective_group(this->kbd, keycode, group);
+     XkbKeySymEntry(this->kbd, keycode, 0, key_group) = keysym;
+ 
++    {
++        int offset = this->kbd->map->key_sym_map[keycode].offset;
++        this->kbd->map->syms[offset] = keysym;
++        this->kbd->device_spec = XkbUseCoreKbd;
++    }
++
+     #ifdef DEBUG_OUTPUT
+     dump_xkb_state(this, keycode, keysym, group);
+     #endif
+@@ -342,9 +348,11 @@ map_keysym_xkb(VirtkeyBase* base, KeySym keysym, int group)
+     // Tell the server
+     {
+         XkbMapChangesRec changes;  // man XkbSetMap
+-        changes.changed = XkbKeySymsMask;
++        changes.changed = XkbKeySymsMask | XkbKeyTypesMask;
+         changes.first_key_sym = keycode;
+         changes.num_key_syms = 1;
++        changes.first_type = 0;
++        changes.num_types = this->kbd->map->num_types;
+ 
+         if (!XkbChangeMap(this->xdisplay, this->kbd, &changes))
+             return 0;
+-- 
+2.20.1
+
